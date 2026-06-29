@@ -1,0 +1,296 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Learning architecture · the method</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+--paper:#FFFFFF; --ink:#0F172A; --muted:#5B6678; --faint:#94A0B2; --line:#E7EAF0; --rail:#FBFCFD; --box:#F7F9FC;
+--p1:#047857; --p2:#13339C; --p3:#2D81C7; --p4:#463E87;
+--display:"Fraunces",Georgia,serif;
+--body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+--mono:"IBM Plex Mono",ui-monospace,"Courier New",monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{background:var(--paper);color:var(--ink);font-family:var(--body);-webkit-font-smoothing:antialiased;line-height:1.5}
+.app{display:flex;height:100vh;overflow:hidden}
+
+/* RAIL */
+.rail{flex:0 0 276px;background:var(--rail);border-right:1px solid var(--line);height:100vh;overflow-y:auto;padding:28px 0 20px;display:flex;flex-direction:column}
+.brand{padding:0 24px 20px;border-bottom:1px solid var(--line);margin-bottom:14px}
+.brand h1{font-family:var(--display);font-weight:500;font-size:22px;letter-spacing:-.01em;line-height:1.12}
+.brand .sub{font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-top:8px;font-weight:600}
+nav{padding:0 14px;flex:1}
+.nav-item{display:block;width:100%;text-align:left;background:none;border:0;cursor:pointer;font-family:var(--body);color:var(--ink);
+padding:10px 14px;border-radius:10px;font-size:14.5px;font-weight:500;transition:background .15s,color .15s;margin-bottom:2px}
+.nav-item:hover{background:#EEF2F7}
+.nav-item[aria-current="true"]{background:var(--c);color:#fff}
+.nav-item:focus-visible{outline:2px solid var(--c);outline-offset:2px}
+.nav-sep{height:1px;background:var(--line);margin:12px 16px}
+.foot{padding:12px 24px 0;font-family:var(--mono);font-size:11px;color:var(--faint)}
+.foot a{color:var(--p2);text-decoration:none}
+
+/* STAGE */
+.stage{flex:1;height:100vh;overflow-y:auto}
+.sheet{max-width:880px;margin:0 auto;padding:clamp(36px,5.5vh,60px) clamp(28px,5vw,60px) 44px;min-height:100%;display:none}
+.sheet.on{display:block;animation:enter .38s cubic-bezier(.22,.61,.36,1)}
+@keyframes enter{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+
+.eyebrow{font-family:var(--mono);font-size:11.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--c);font-weight:600;margin-bottom:11px}
+h2{font-family:var(--display);font-weight:500;letter-spacing:-.015em;line-height:1.05;font-size:clamp(28px,3.6vw,40px);margin-bottom:14px}
+.lead{font-size:clamp(16px,1.7vw,19px);color:#28303E;margin-bottom:26px;max-width:60ch}
+
+.grouplabel{font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);font-weight:600;margin:26px 0 12px}
+
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:14px}
+.card{border:1px solid var(--line);border-radius:13px;padding:17px 19px;background:#fff}
+.card .ct{font-weight:600;font-size:14.5px;color:var(--c);margin-bottom:7px}
+.card p{font-size:14px;color:#3A4456;line-height:1.5}
+
+.box{background:var(--box);border:1px solid var(--line);border-radius:16px;padding:18px 18px 6px;margin-top:8px}
+.box .bl{font-family:var(--mono);font-size:10.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--muted);font-weight:600;padding:0 2px 12px}
+.box .cards{grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}
+.mini{border:1px solid var(--line);border-radius:11px;padding:12px 15px;background:#fff;font-size:13.5px;color:#3A4456;margin-bottom:12px}
+
+.chips{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px}
+.chip{border:1px solid var(--line);border-top:3px solid var(--cc);border-radius:11px;padding:12px 14px;text-align:center;font-weight:600;font-size:14px}
+
+.out{margin-top:24px;font-family:var(--mono);font-size:12.5px;color:var(--muted)}
+.out b{color:var(--c);font-weight:600}
+
+/* levels */
+.levels{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px}
+.lv{border:1px solid var(--line);border-top:4px solid var(--lc);border-radius:13px;padding:17px 19px}
+.lv .ln{font-family:var(--display);font-weight:600;font-size:19px}
+.lv .ld{font-family:var(--mono);font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--lc);font-weight:600;margin:5px 0 9px}
+.lv .star{display:inline-block;margin-left:6px;color:var(--lc)}
+.lv p{font-size:14px;color:#3A4456;line-height:1.5}
+.closer{font-family:var(--display);font-weight:500;font-size:clamp(18px,2.2vw,23px);line-height:1.4;margin-top:24px;max-width:50ch}
+
+.pager{display:flex;justify-content:space-between;gap:14px;margin-top:40px;padding-top:20px;border-top:1px solid var(--line)}
+.pager button{background:none;border:0;cursor:pointer;font-family:var(--body);text-align:left;padding:0;max-width:46%}
+.pager button:last-child{text-align:right}
+.pager .k{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--faint);display:block;margin-bottom:3px}
+.pager .v{font-family:var(--display);font-size:17px;color:var(--ink);font-weight:500}
+.pager button:hover .v{text-decoration:underline}
+.pager button:disabled{visibility:hidden}
+
+@media (prefers-reduced-motion:reduce){.sheet.on{animation:none}}
+@media (max-width:780px){
+.app{flex-direction:column;height:auto;overflow:visible}
+.rail{flex:none;width:100%;height:auto;border-right:0;border-bottom:1px solid var(--line)}
+.stage{height:auto}
+nav{display:flex;flex-wrap:wrap;gap:4px}
+}
+</style>
+</head>
+<body>
+<div class="app">
+
+<aside class="rail">
+<div class="brand">
+<h1>Learning architecture</h1>
+<div class="sub">The method</div>
+</div>
+<nav id="nav" aria-label="Phases">
+<button class="nav-item" data-k="overview" style="--c:var(--ink)">Overview</button>
+<button class="nav-item" data-k="explore"  style="--c:var(--p1)">Explore</button>
+<button class="nav-item" data-k="classify" style="--c:var(--p2)">Classify</button>
+<button class="nav-item" data-k="write"    style="--c:var(--p2)">Write</button>
+<button class="nav-item" data-k="validate" style="--c:var(--p3)">Validate</button>
+<button class="nav-item" data-k="evaluate" style="--c:var(--p3)">Evaluate</button>
+<button class="nav-item" data-k="improve"  style="--c:var(--p4)">Improve</button>
+<div class="nav-sep"></div>
+<button class="nav-item" data-k="levels"   style="--c:var(--ink)">The levels of knowledge</button>
+</nav>
+<div class="foot">A reusable method &middot; <a href="https://www.linkedin.com/in/apastorp/" target="_blank" rel="noopener">LinkedIn</a></div>
+</aside>
+
+<main class="stage" id="stage">
+
+<!-- OVERVIEW -->
+<section class="sheet" data-k="overview" style="--c:var(--ink)">
+<div class="eyebrow">The method</div>
+<h2>What learning architecture is</h2>
+<p class="lead">How content becomes capability a learner can prove.</p>
+
+<div class="grouplabel">The method, six moves</div>
+<div class="chips">
+<div class="chip" style="--cc:var(--p1)">Explore</div>
+<div class="chip" style="--cc:var(--p2)">Classify</div>
+<div class="chip" style="--cc:var(--p2)">Write</div>
+<div class="chip" style="--cc:var(--p3)">Validate</div>
+<div class="chip" style="--cc:var(--p3)">Evaluate</div>
+<div class="chip" style="--cc:var(--p4)">Improve</div>
+</div>
+
+<div class="grouplabel">Three layers</div>
+<div class="cards">
+<div class="card"><div class="ct">Content</div><p>Topics filed so learners can find them.</p></div>
+<div class="card"><div class="ct">Capability</div><p>The abilities a learner performs, sequenced.</p></div>
+<div class="card"><div class="ct">Credential</div><p>Proof to a defined standard.</p></div>
+</div>
+
+<div class="grouplabel">Four levels</div>
+<div class="chips">
+<div class="chip" style="--cc:var(--p1)">Foundation</div>
+<div class="chip" style="--cc:var(--p2)">Technician</div>
+<div class="chip" style="--cc:var(--p3)">Administrator</div>
+<div class="chip" style="--cc:var(--p4)">Expert</div>
+</div>
+<div class="pager"></div>
+</section>
+
+<!-- EXPLORE -->
+<section class="sheet" data-k="explore" style="--c:var(--p1)">
+<div class="eyebrow">Diagnose</div>
+<h2>Explore</h2>
+<p class="lead">What exists, and what problem should the learning solve?</p>
+<div class="cards">
+<div class="card"><div class="ct">Read the source</div><p>Against three tests: methodology, structure, navigation.</p></div>
+<div class="card"><div class="ct">Readiness floor</div><p>The knowledge a learner brings on day one.</p></div>
+<div class="card"><div class="ct">Scope line</div><p>What the program teaches, and what it assumes.</p></div>
+</div>
+<div class="box">
+<div class="bl">Sources</div>
+<div class="cards">
+<div class="mini">An existing course</div>
+<div class="mini">Product or technical documentation</div>
+<div class="mini">A prior instructional-design output</div>
+<div class="mini">A survey of learners, managers, or the field</div>
+<div class="mini">An outside source of unverified quality</div>
+<div class="mini">Trending demand on social media</div>
+</div>
+</div>
+<p class="out">Output &rarr; <b>a diagnosis, the audience, and the scope</b></p>
+<div class="pager"></div>
+</section>
+
+<!-- CLASSIFY -->
+<section class="sheet" data-k="classify" style="--c:var(--p2)">
+<div class="eyebrow">Design</div>
+<h2>Classify</h2>
+<p class="lead">How does capability grow across the lessons?</p>
+<div class="cards">
+<div class="card"><div class="ct">Sequence</div><p>Sort concept and technical content into an order of lessons.</p></div>
+<div class="card"><div class="ct">Demand</div><p>Set each level with Bloom's taxonomy.</p></div>
+<div class="card"><div class="ct">Evidence</div><p>Define the proof for each capability first.</p></div>
+</div>
+<div class="box">
+<div class="bl">Adult learning holds it together</div>
+<div class="cards">
+<div class="mini">Adults arrive with experience</div>
+<div class="mini">They need relevance and a reason</div>
+<div class="mini">They learn by doing</div>
+<div class="mini">They carry the result back to real work</div>
+</div>
+</div>
+<p class="out">Output &rarr; <b>a lesson sequence, a demand map, and the evidence map</b></p>
+<div class="pager"></div>
+</section>
+
+<!-- WRITE -->
+<section class="sheet" data-k="write" style="--c:var(--p2)">
+<div class="eyebrow">Develop</div>
+<h2>Write</h2>
+<p class="lead">What gets built, and in what form?</p>
+<div class="cards">
+<div class="card"><div class="ct">Outline</div><p>What lives in each lesson.</p></div>
+<div class="card"><div class="ct">Media map</div><p>Video, podcast, simulation, interactivity, decision events.</p></div>
+<div class="card"><div class="ct">Script</div><p>Every lesson in its final words.</p></div>
+</div>
+<p class="out">Output &rarr; <b>the outline, the media map, and the script</b></p>
+<div class="pager"></div>
+</section>
+
+<!-- VALIDATE -->
+<section class="sheet" data-k="validate" style="--c:var(--p3)">
+<div class="eyebrow">Review</div>
+<h2>Validate</h2>
+<p class="lead">What must experts confirm?</p>
+<div class="cards">
+<div class="card"><div class="ct">Experts</div><p>Confirm the facts, the vocabulary, and the sequence.</p></div>
+<div class="card"><div class="ct">Peers</div><p>Surface learning gaps and improvements.</p></div>
+<div class="card"><div class="ct">Held items</div><p>Stay open until the right person closes them.</p></div>
+</div>
+<p class="out">Output &rarr; <b>a validation log, held items resolved</b></p>
+<div class="pager"></div>
+</section>
+
+<!-- EVALUATE -->
+<section class="sheet" data-k="evaluate" style="--c:var(--p3)">
+<div class="eyebrow">Review</div>
+<h2>Evaluate</h2>
+<p class="lead">Is the learning ready for learners?</p>
+<div class="cards">
+<div class="card"><div class="ct">Review</div><p>Check the learning against the standard.</p></div>
+<div class="card"><div class="ct">Pilot</div><p>Run it with a sample and read the result.</p></div>
+<div class="card"><div class="ct">Refine</div><p>Improve what the pilot surfaces.</p></div>
+</div>
+<p class="out">Output &rarr; <b>a reviewed, refined learning experience</b></p>
+<div class="pager"></div>
+</section>
+
+<!-- IMPROVE -->
+<section class="sheet" data-k="improve" style="--c:var(--p4)">
+<div class="eyebrow">Improve</div>
+<h2>Improve</h2>
+<p class="lead">What do the learners' results teach us?</p>
+<div class="cards">
+<div class="card"><div class="ct">Measure</div><p>Reaction, learning, behavior, result.</p></div>
+<div class="card"><div class="ct">Read</div><p>See where learners struggle and where they succeed.</p></div>
+<div class="card"><div class="ct">Refine</div><p>Feed what you learn into the next version.</p></div>
+</div>
+<p class="out">Output &rarr; <b>a stronger next version of the lessons</b></p>
+<div class="pager"></div>
+</section>
+
+<!-- LEVELS -->
+<section class="sheet" data-k="levels" style="--c:var(--ink)">
+<div class="eyebrow">The maturity it builds</div>
+<h2>The levels of knowledge</h2>
+<p class="lead">Each level asks a little more of the mind.</p>
+<div class="levels">
+<div class="lv" style="--lc:var(--p1)"><div class="ln">Foundation</div><div class="ld">assumed at entry</div><p>The knowledge a learner brings on day one.</p></div>
+<div class="lv" style="--lc:var(--p2)"><div class="ln">Technician</div><div class="ld">demand: apply</div><p>Runs the defined work accurately, and knows when to ask for help.</p></div>
+<div class="lv" style="--lc:var(--p3)"><div class="ln">Administrator <span class="star">&#9733;</span></div><div class="ld">certified &middot; analyze to evaluate</div><p>Reads a real case, then decides, configures, and validates to a standard.</p></div>
+<div class="lv" style="--lc:var(--p4)"><div class="ln">Expert</div><div class="ld">demand: evaluate to create</div><p>Designs the standard, governs across cases, and improves the practice.</p></div>
+</div>
+<p class="closer">An administrator does the work for one real case. An expert designs and governs it for many.</p>
+<div class="pager"></div>
+</section>
+
+</main>
+</div>
+
+<script>
+(function(){
+var order=["overview","explore","classify","write","validate","evaluate","improve","levels"];
+var titles={overview:"Overview",explore:"Explore",classify:"Classify",write:"Write",validate:"Validate",evaluate:"Evaluate",improve:"Improve",levels:"The levels"};
+var navBtns=[].slice.call(document.querySelectorAll(".nav-item"));
+var sheets={}; document.querySelectorAll(".sheet").forEach(function(s){sheets[s.dataset.k]=s;});
+var stage=document.getElementById("stage");
+function show(k){
+order.forEach(function(key){ sheets[key].classList.toggle("on", key===k); });
+navBtns.forEach(function(b){ b.setAttribute("aria-current", b.dataset.k===k?"true":"false"); });
+stage.scrollTop=0; buildPager(k);
+try{ history.replaceState(null,"","#"+k); }catch(e){}
+}
+function buildPager(k){
+var i=order.indexOf(k), pager=sheets[k].querySelector(".pager"); pager.innerHTML="";
+var prev=document.createElement("button"), next=document.createElement("button");
+if(i>0){var pk=order[i-1]; prev.innerHTML='<span class="k">Previous</span><span class="v">&larr; '+titles[pk]+'</span>'; prev.onclick=function(){show(pk);};} else prev.disabled=true;
+if(i<order.length-1){var nk=order[i+1]; next.innerHTML='<span class="k">Next</span><span class="v">'+titles[nk]+' &rarr;</span>'; next.onclick=function(){show(nk);};} else next.disabled=true;
+pager.appendChild(prev); pager.appendChild(next);
+}
+navBtns.forEach(function(b){ b.addEventListener("click",function(){show(b.dataset.k);}); });
+var start=(location.hash||"").replace("#",""); show(order.indexOf(start)>=0?start:"overview");
+})();
+</script>
+</body>
+</html>
